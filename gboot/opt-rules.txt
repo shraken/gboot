@@ -1,0 +1,46 @@
+replace {
+	jz	%1
+	sjmp	%2
+%1:
+} by {
+	jnz     %2
+}
+
+replace {
+	jc	%1
+	sjmp	%2
+%1:
+} by {
+	jnc     %2
+}
+
+replace {
+	jb	%1
+	sjmp	%2
+%1:
+} by {
+	jnb     %2
+}
+
+replace {
+	mov	%1,%2
+	mov	a,%3
+	anl	a,%1
+	mov	%2,a
+} by {
+	anl     %2,%3
+}
+
+replace {
+	mov	ar6,@%1
+	inc	r1
+	mov	ar7,@%1
+	mov	%2,r6
+	mov	%3,r7
+} by {
+	mov	a,@%1
+	mov     %2,a
+	inc	r1
+	mov	a,@%1
+	mov	%3,a
+}

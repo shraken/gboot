@@ -1,0 +1,2 @@
+#!/bin/bash
+srec_cat $1 -Intel -exclude 0x1e 0x22 -generate 0x1e 0x22 --little_endian_constant $2 4 -o $1 -Intel

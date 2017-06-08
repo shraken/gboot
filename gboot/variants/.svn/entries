@@ -1,0 +1,37 @@
+10
+
+dir
+411
+svn+ssh://a64/home/svn/gglabs/gboot/trunk/variants
+svn+ssh://a64/home/svn/gglabs
+
+
+
+2013-12-01T03:08:22.236389Z
+411
+gorlik
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+a8ff4a96-8458-4040-93ac-3b83851fce7c
+
+basic
+dir
+
+F38x
+dir
+
+dual_uart
+dir
+
