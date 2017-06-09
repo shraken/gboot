@@ -15,12 +15,8 @@ PROD_CONFIG=0xffffffff
 FLASH_SIZE=16
 FW_START=0x0400
 
-#CC = sdcc
-#AS = sdas8051
-#CC = /usr/local/sdcc30/bin/sdcc
-#AS = /usr/local/sdcc30/bin/sdas8051
-CC = /mnt/share/local/sdcc33/bin/sdcc
-AS = /mnt/share/local/sdcc33/bin/sdas8051
+CC = sdcc
+AS = sdas8051
 
 # now both tiny and standard are 1.5k and use first 2 and last page of flash
 ifeq ($(FLASH_SIZE),16)
@@ -60,32 +56,28 @@ CFLAGS += --std-c99
 MFLAGS = --model-small 
 CFLAGS+= -DFLASH_START=$(FW_START) -DHIGH_SEG=$(HIGH_SEG)U
 
+BUILD_DIR = build
+GBOOT_C_SRCS=$(wildcard ./*.c)
+GBOOT_C_OBJS=$(GBOOT_C_SRCS:./%.c=./$(BUILD_DIR)/%.rel)
+
+GBOOT_ASM_SRCS=$(wildcard ./*.a51)
+GBOOT_ASM_OBJS=$(GBOOT_ASM_SRCS:./%.a51=./$(BUILD_DIR)/%.rel)
+
 all: gboot.bin
 
-OBJECTS = gboot_main.rel \
-	  gboot_report_handlers.rel \
-	  gboot_usb_descriptor.rel \
-	  gboot_usb_core.rel \
-	  gboot_crtstart.rel
+directories:
+	mkdir build
 
 gboot.bin: gboot.hex
-	srec_cat -Disable_Sequence_Warnings gboot.hex -Intel -Output gboot.bin -Binary 
+	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.hex -Intel -Output $(BUILD_DIR)/gboot.bin -Binary 
 
-gboot.hex: $(OBJECTS)
-	$(CC) -o gboot.out $(MFLAGS) $(LFLAGS) $(OBJECTS)
-	srec_cat -Disable_Sequence_Warnings gboot.out -Intel -Output gboot.hex -Intel
-	scripts/set_mcu gboot.hex $(MCU)
-	scripts/set_pid gboot.hex $(PROD_PID)
-	scripts/set_ver gboot.hex $(PROD_REV)
-	scripts/set_pcbrev gboot.hex $(PROD_PCB)
-	scripts/set_ext_info gboot.hex $(EXT_INFO)
-	scripts/set_serial gboot.hex $(PROD_SERIAL)
-	scripts/set_config gboot.hex $(PROD_CONFIG)
-	cat gboot.mem
+gboot.hex: directories $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
+	$(CC) -o $(BUILD_DIR)/gboot.out $(MFLAGS) $(LFLAGS) $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
+	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.out -Intel -Output $(BUILD_DIR)/gboot.hex -Intel
+	cat $(BUILD_DIR)/gboot.mem
 
 clean:
-	rm -f core *~ \#* *.cdb *.asm *.rel *.hex *.lst *.map *.omf *.lk tmp.out \
-	    *.rst *.sym *.lnk *.lib *.bin *.adb *.mem *.#* gboot.bin gboot.out
+	rm -rf build
 
 distclean:
 	make clean
@@ -123,8 +115,8 @@ release:
 	make clean
 
 
-%.rel: %.c *.h
-	$(CC) -c $(CFLAGS) $(JMP_SIZE) $(MFLAGS) $<
+$(BUILD_DIR)/%.rel: %.c *.h
+	$(CC) -c $(CFLAGS) $(JMP_SIZE) $(MFLAGS) $< -o $(BUILD_DIR)/
 
-%.rel: %.a51
-	$(AS) -jxlosp -Ivariants/$(VARIANT) $<
+$(BUILD_DIR)/%.rel: %.a51
+	$(AS) -jxlspo -Ivariants/$(VARIANT) $@ $< 
