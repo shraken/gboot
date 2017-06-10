@@ -74,6 +74,8 @@ gboot.bin: gboot.hex
 gboot.hex: directories $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
 	$(CC) -o $(BUILD_DIR)/gboot.out $(MFLAGS) $(LFLAGS) $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
 	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.out -Intel -Output $(BUILD_DIR)/gboot.hex -Intel
+	srec_cat $(BUILD_DIR)/gboot.hex -Intel -exclude 0x08 0x0a -generate 0x08 0x0a -little_endian_constant $(MCU) 2 -o $(BUILD_DIR)/gboot.hex -Intel
+
 	cat $(BUILD_DIR)/gboot.mem
 
 clean:
@@ -86,18 +88,20 @@ distclean:
 bin_copy:
 	make clean
 	make
-	cp gboot.bin bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).bin
-	cp gboot.hex bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).hex
-	cp gboot.mem bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).mem
-	cp gboot.map bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).map
+	cp $(BUILD_DIR)/gboot.bin bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).bin
+	cp $(BUILD_DIR)/gboot.hex bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).hex
+	cp $(BUILD_DIR)/gboot.mem bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).mem
+	cp $(BUILD_DIR)/gboot.map bin/gboot_$(MCU)_$(FLASH_SIZE)k_$(BUILD).map
     
 
-release:
+release: distclean
+ifeq ($(OS),Windows_NT)
+	mkdir bin
+else
 	mkdir -p bin
-	# configurations for F32x
+endif
 	make bin_copy BUILD=std  MCU=0xF320 FLASH_SIZE=16 VARIANT=basic
 	make bin_copy BUILD=tiny MCU=0xF320 FLASH_SIZE=16 VARIANT=basic
-	# configurations for F34x
 	make bin_copy BUILD=std  MCU=0xF341 FLASH_SIZE=32 VARIANT=dual_uart
 	make bin_copy BUILD=tiny MCU=0xF341 FLASH_SIZE=32 VARIANT=dual_uart
 	make bin_copy BUILD=std  MCU=0xF340 FLASH_SIZE=64 VARIANT=dual_uart
@@ -106,7 +110,6 @@ release:
 	make bin_copy BUILD=tiny MCU=0xF343 FLASH_SIZE=32 VARIANT=basic
 	make bin_copy BUILD=std  MCU=0xF342 FLASH_SIZE=64 VARIANT=basic
 	make bin_copy BUILD=tiny MCU=0xF342 FLASH_SIZE=64 VARIANT=basic
-	# configurations for F38x
 	make bin_copy BUILD=std  MCU=0xF382 FLASH_SIZE=32 VARIANT=F38x
 	make bin_copy BUILD=tiny MCU=0xF382 FLASH_SIZE=32 VARIANT=F38x
 	make bin_copy BUILD=std  MCU=0xF380 FLASH_SIZE=64 VARIANT=F38x

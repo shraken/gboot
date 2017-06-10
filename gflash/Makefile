@@ -18,7 +18,7 @@ linux_debug:
 	mv linuxd/$(NAME) $(NAME)d
 
 win:
-	mkdir -p win32
+	mkdir win32
 	( cd win32; $(MAKE) -f../Makefile.app APP=$(NAME) BUILD=WIN32)
 	mv win32/$(NAME)_cli $(NAME)_cli.exe
 #	mv win32/$(NAME)_gui $(NAME)_gui.exe

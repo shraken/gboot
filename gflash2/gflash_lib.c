@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "libusb.h"
 
-#include "gboot/gboot_usb_interface.h"
+#include <gboot/gboot_usb_interface.h>
 #include "gflash_lib.h"
 
 #define VERSION "0.1.0"
