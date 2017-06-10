@@ -1,5 +1,7 @@
 BUILD=tiny
 
+JLINK_DEVICE_TYPE=EFM8UB20F64G
+
 MCU=0xF320
 PROD_PID=0xffff
 PROD_REV=0x10
@@ -80,6 +82,7 @@ gboot.hex: directories $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
 
 clean:
 	rm -rf build
+	rm -rf flash.jlink
 
 distclean:
 	make clean
@@ -123,3 +126,17 @@ $(BUILD_DIR)/%.rel: %.c *.h
 
 $(BUILD_DIR)/%.rel: %.a51
 	$(AS) -jxlspo -Ivariants/$(VARIANT) $@ $< 
+
+JLINK_OPTS = -device $(JLINK_DEVICE_TYPE) -if c2 -speed 4000
+# flashing windows vs. posix
+ifeq ($(OS),Windows_NT)
+JLINK = JLink $(JLINK_OPTS)
+else
+JLINK = JLinkExe $(JLINK_OPTS)
+endif # flashing windows vs. posix
+
+flash: flash.jlink
+	$(JLINK) flash.jlink
+
+flash.jlink:
+	printf "erase\nloadbin build/gboot.hex,0\nexit\n" > flash.jlink
