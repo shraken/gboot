@@ -1,8 +1,8 @@
-BUILD=tiny
+BUILD=std
 
 JLINK_DEVICE_TYPE=EFM8UB20F64G
 
-MCU=0xF320
+MCU=0xF380
 PROD_PID=0xffff
 PROD_REV=0x10
 PROD_PCB=0xA0
@@ -74,10 +74,8 @@ gboot.bin: gboot.hex
 	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.hex -Intel -Output $(BUILD_DIR)/gboot.bin -Binary 
 
 gboot.hex: directories $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
-	$(CC) -o $(BUILD_DIR)/gboot.out $(MFLAGS) $(LFLAGS) $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
-	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.out -Intel -Output $(BUILD_DIR)/gboot.hex -Intel
-	srec_cat $(BUILD_DIR)/gboot.hex -Intel -exclude 0x08 0x0a -generate 0x08 0x0a -little_endian_constant $(MCU) 2 -o $(BUILD_DIR)/gboot.hex -Intel
-
+	$(CC) $(MFLAGS) $(LFLAGS) $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS) -o $(BUILD_DIR)/gboot.ihx
+	packihx $(BUILD_DIR)/gboot.ihx > $(BUILD_DIR)/gboot.hex
 	cat $(BUILD_DIR)/gboot.mem
 
 clean:
