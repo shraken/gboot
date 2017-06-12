@@ -2,17 +2,17 @@ BUILD=std
 
 JLINK_DEVICE_TYPE=EFM8UB20F64G
 
-MCU=0xF380
-PROD_PID=0xffff
-PROD_REV=0x10
-PROD_PCB=0xA0
+MCU=F380
+PROD_PID=ffff
+PROD_REV=10
+PROD_PCB=A0
 # variant can be one of: basic, dual_uart, F38x
 VARIANT=basic
 
 
-EXT_INFO=0xffffffff
-PROD_SERIAL=0xffffffff
-PROD_CONFIG=0xffffffff
+EXT_INFO=ffffffff
+PROD_SERIAL=ffffffff
+PROD_CONFIG=ffffffff
 
 FLASH_SIZE=16
 FW_START=0x0400
@@ -68,7 +68,11 @@ GBOOT_ASM_OBJS=$(GBOOT_ASM_SRCS:./%.a51=./$(BUILD_DIR)/%.rel)
 all: gboot.bin
 
 directories:
-	mkdir build
+ifeq ($(OS),Windows_NT)
+	if not exist "build" mkdir build
+else
+	mkdir -p build
+endif
 
 gboot.bin: gboot.hex
 	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.hex -Intel -Output $(BUILD_DIR)/gboot.bin -Binary 
@@ -76,6 +80,7 @@ gboot.bin: gboot.hex
 gboot.hex: directories $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS)
 	$(CC) $(MFLAGS) $(LFLAGS) $(GBOOT_C_OBJS) $(GBOOT_ASM_OBJS) -o $(BUILD_DIR)/gboot.ihx
 	packihx $(BUILD_DIR)/gboot.ihx > $(BUILD_DIR)/gboot.hex
+	python scripts/set_gboot_params.py -f $(BUILD_DIR)/gboot.hex -m $(MCU) -p $(PROD_PID) -e $(EXT_INFO) -r $(PROD_PCB) -s $(PROD_SERIAL) -c $(PROD_CONFIG) -v $(PROD_REV)
 	cat $(BUILD_DIR)/gboot.mem
 
 clean:

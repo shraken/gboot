@@ -74,8 +74,6 @@ static int print_info()
     printf("GBOOT version: %x.%x\n", (ginfo.gboot_version)>>8, 
 	   (ginfo.gboot_version)&0xff );
 
-  printf("GBOOT version (unmod): %04x\n", ginfo.gboot_version);
-
   printf("API supported: %x\n",ginfo.api_ver);
   printf("MCU: %04X\n",ginfo.mcu);
 
