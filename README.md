@@ -30,16 +30,20 @@ CMake 2.8.x+ (https://cmake.org/)
 
 ## Building gboot
 
-Type make FLASH_SIZE=xx VARIANT=vv  in the `gboot` directory where
+Type `make FLASH_SIZE=xx VARIANT=vv`  in the `gboot` directory where
 xx is 16, 32 or 64 based on the target device and vv is one of basic, 
 dual_uart or F38x based on the chip used.
 
 ## Building gflash
 
 To create the gflash binary:
+
 `mkdir build`
+
 `cd build`
+
 `cmake ..`
+
 `make`
 
 ## Flashing
