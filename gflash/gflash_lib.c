@@ -23,9 +23,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <libusb-1.0/libusb.h>
+#include "libusb.h"
 
-#include "gboot/gboot_usb_interface.h"
+#include <gboot/gboot_usb_interface.h>
 #include "gflash_lib.h"
 
 #define VERSION "0.1.0"
@@ -197,8 +197,8 @@ int gboot_get_info(libusb_device_handle *devh, struct gboot_info *info)
     info->pcb_rev=buf[3];
     gboot_cmd_read(devh, DEV_SERIAL_OFFSET, buf);
     info->serial=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
-    gboot_cmd_read(devh, DEV_FEATURE_OFFSET, buf);
-    info->dev_config=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
+    //gboot_cmd_read(devh, DEV_FEATURE_OFFSET, buf);
+    //info->dev_config=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
     gboot_cmd_read(devh, EXT_INFO_OFFSET, buf);
     info->ext_info=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
   } else {

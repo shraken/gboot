@@ -1,2 +1,0 @@
-#!/bin/bash
-srec_cat $1 -Intel -exclude 0x16 0x18 -generate 0x16 0x18 --little_endian_constant $2 2 -o $1 -Intel

@@ -1,0 +1,4 @@
+gboot/build/
+gboot/bin/
+gboot/flash.jlink
+gflash/build/
