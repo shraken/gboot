@@ -1,2 +1,0 @@
-#!/bin/bash
-srec_cat $1 -Intel -exclude 0x08 0x0a -generate 0x08 0x0a -little_endian_constant $2 2 -o $1 -Intel
