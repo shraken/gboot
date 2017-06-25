@@ -24,9 +24,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <libusb-1.0/libusb.h>
+#include "libusb.h"
 
-#include "gboot/gboot_usb_interface.h"
+#include <gboot/gboot_usb_interface.h>
 #include "gflash_lib.h"
 
 static struct libusb_device_handle *devh = NULL;

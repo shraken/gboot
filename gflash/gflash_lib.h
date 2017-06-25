@@ -21,8 +21,8 @@
 #ifndef GFLASH_LIB_H
 #define GFLASH_LIB_H
 
-#include <libusb-1.0/libusb.h>
-#include "gboot/gboot_usb_interface.h"
+#include "libusb.h"
+#include <gboot/gboot_usb_interface.h>
 
 #ifdef __cplusplus
 extern "C" {

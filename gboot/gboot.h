@@ -25,7 +25,8 @@
 // User Configuration Options
 //-----------------------------------------------------------------------------
 #ifndef HIGH_SEG
-#define HIGH_SEG    0x3C00U
+//#define HIGH_SEG    0x3C00U
+#define HIGH_SEG    0xFA00U
 #endif
 
 
