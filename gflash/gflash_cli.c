@@ -109,6 +109,8 @@ static int program (char *fname)
   int i,s;
   unsigned char fw[16*1024];
   //  int tiny;
+  unsigned char buf[CMD_PACKET_SIZE];
+  struct gboot_info ginfo;
 
   f=fopen(fname,"rb");
   if(f==NULL) {
@@ -121,8 +123,6 @@ static int program (char *fname)
   printf("firmware %s size: %d\n",fname,s);
 
   // int page_size,fstart,fend,fsize;
-  unsigned char buf[CMD_PACKET_SIZE];
-  struct gboot_info ginfo;
 
   gboot_get_info(devh,&ginfo);
 
@@ -198,7 +198,7 @@ static void print_usage()
 
 int main(int argc, char *argv[])
 {
-  
+  int i;
   int r = 1;
   
   r = libusb_init(NULL);
@@ -215,8 +215,6 @@ int main(int argc, char *argv[])
       goto out;
     }
     //	printf("Successfully found GBOOT\n");
-    
-    int i;
     
     if(argc==2 && *argv[1]=='m') { 
       for(i=0;i<0x3e00;i+=8) {

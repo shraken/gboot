@@ -68,11 +68,12 @@ GBOOT_ASM_OBJS=$(GBOOT_ASM_SRCS:./%.a51=./$(BUILD_DIR)/%.rel)
 all: gboot.bin
 
 directories:
-ifeq ($(OS),Windows_NT)
-	if not exist "build" mkdir build
-else
 	mkdir -p build
-endif
+#ifeq ($(OS),Windows_NT)
+#	if not exist "build" mkdir build
+#else
+#	mkdir -p build
+#endif
 
 gboot.bin: gboot.hex
 	srec_cat -Disable_Sequence_Warnings $(BUILD_DIR)/gboot.hex -Intel -Output $(BUILD_DIR)/gboot.bin -Binary 

@@ -96,7 +96,7 @@ void gboot_main(void)
   // 2- corrupted reset vector in firmware
   // 3- sw initiated reboot with xdata flag  
   if( 
-     ( (P3_0==1) && 
+     ( (P3_6==1) && 
        (*((__code unsigned char * )FLASH_START)==0x02) ) &&
      ( !( (RSTSRC&0x10) && (*((__xdata unsigned char * )0x0000)==0xa5) ) )
       ) {
@@ -129,7 +129,8 @@ void gboot_main(void)
   }
 #endif
   __asm
-    jnb	_P3_0,10102$
+    nop
+    jnb	_P3_6,10102$
     mov	dptr,# FLASH_START
     clr	a
     movc	a,@a+dptr
