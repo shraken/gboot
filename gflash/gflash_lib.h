@@ -21,7 +21,8 @@
 #ifndef GFLASH_LIB_H
 #define GFLASH_LIB_H
 
-#include "libusb.h"
+//#include "libusb.h"
+#include <hidapi.h>
 #include <gboot/gboot_usb_interface.h>
 
 #ifdef __cplusplus
@@ -45,19 +46,19 @@ extern "C" {
   };
 
  
-  struct libusb_device_handle *gboot_open(void);
-  int gboot_close(struct libusb_device_handle *devh);
-  int gboot_cmd_reboot(libusb_device_handle *devh);
-  int gboot_cmd_write(libusb_device_handle *devh, unsigned int addr, unsigned char d);
+  hid_device *gboot_open(void);
+  int gboot_close(hid_device *devh);
+  int gboot_cmd_reboot(hid_device *devh);
+  int gboot_cmd_write(hid_device *devh, unsigned int addr, unsigned char d);
   
-  int gboot_cmd_erase(libusb_device_handle *devh, unsigned int addr);
-  int gboot_cmd_read(libusb_device_handle *devh,
+  int gboot_cmd_erase(hid_device *devh, unsigned int addr);
+  int gboot_cmd_read(hid_device *devh,
 		     unsigned int addr,   unsigned char buf[CMD_PACKET_SIZE]);
 
-  int gboot_get_info(libusb_device_handle *devh, struct gboot_info *info);
+  int gboot_get_info(hid_device *devh, struct gboot_info *info);
 
-  int gboot_recv(libusb_device_handle *devh, unsigned char packet[CMD_PACKET_SIZE]);
-  int gboot_send(libusb_device_handle *devh, unsigned char packet[CMD_PACKET_SIZE]);
+  int gboot_recv(hid_device *devh, unsigned char packet[CMD_PACKET_SIZE]);
+  int gboot_send(hid_device *devh, unsigned char packet[CMD_PACKET_SIZE]);
 
 
 #ifdef __cplusplus

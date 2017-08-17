@@ -24,13 +24,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "libusb.h"
+//#include "libusb.h"
+#include <hidapi.h>
 
 #include <gboot/gboot_usb_interface.h>
 #include "gflash_lib.h"
 
-static struct libusb_device_handle *devh = NULL;
-
+//static struct libusb_device_handle *devh = NULL;
+static hid_device *devh = NULL;
 
 static void print_data(int addr, unsigned char *p, int len)
 {
@@ -201,11 +202,19 @@ int main(int argc, char *argv[])
   
   int r = 1;
   
+  /*
   r = libusb_init(NULL);
   if (r < 0) {
     fprintf(stderr, "Failed to initialize libusb\n");
     exit(1);
   }
+  */
+
+  if (hid_init()) {
+    fprintf(stderr, "Failed to initialize hidapi\n");
+    exit(1);
+  }
+
 //    libusb_set_debug(NULL,7);
   
   if(argc>1) {
@@ -240,8 +249,10 @@ int main(int argc, char *argv[])
     
   out:
     gboot_close(devh);
+    hid_exit();
+    
   } else print_usage();
 
-  libusb_exit(NULL);
+  //libusb_exit(NULL);
   return r >= 0 ? r : -r;
 }

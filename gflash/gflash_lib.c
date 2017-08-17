@@ -23,7 +23,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "libusb.h"
+//#include "libusb.h"
+#include <hidapi.h>
 
 #include <gboot/gboot_usb_interface.h>
 #include "gflash_lib.h"
@@ -42,8 +43,18 @@
 #define HID_REPORT_TYPE_OUTPUT        0x02
 #define HID_REPORT_TYPE_FEATURE       0x03
 
+#define USB_ENDPOINT_IN 0x80
+#define USB_ENDPOINT_OUT 0x00
+#define USB_REQUEST_TYPE_CLASS (0x01 << 5)
+#define USB_RECIPIENT_INTERFACE 0x01
+
+/*
 #define CTRL_IN		(LIBUSB_ENDPOINT_IN|LIBUSB_REQUEST_TYPE_CLASS|LIBUSB_RECIPIENT_INTERFACE)
 #define CTRL_OUT	(LIBUSB_ENDPOINT_OUT|LIBUSB_REQUEST_TYPE_CLASS|LIBUSB_RECIPIENT_INTERFACE)
+*/
+
+#define CTRL_IN   (USB_ENDPOINT_IN|USB_REQUEST_TYPE_CLASS|USB_RECIPIENT_INTERFACE)
+#define CTRL_OUT  (USB_ENDPOINT_OUT|USB_REQUEST_TYPE_CLASS|USB_RECIPIENT_INTERFACE)
 
 //#define PACKET_SIZE RFEAT_FAN_CFG_SIZE
 
@@ -62,9 +73,25 @@ const static int TIMEOUT=5000; /* timeout in ms */
   DEV_FEATURE_OFFSET
   };*/
 
-struct libusb_device_handle *gboot_open(void)
+hid_device *gboot_open(void)
 {
-  libusb_device_handle *devh;
+  hid_device *devh;
+
+  fprintf(stderr, "looking for %04x %04x\n",VENDOR_ID,PRODUCT_ID);
+
+  devh = hid_open(VENDOR_ID, PRODUCT_ID, NULL);
+  if (!devh) {
+    fprintf(stderr, "cannot find device\n");
+    return NULL;
+  }
+
+  // Set the hid_read() function to be non-blocking.
+  hid_set_nonblocking(devh, 1);
+
+  return devh;
+
+  /*
+  //libusb_device_handle *devh;
   int r;
 
   fprintf(stderr, "looking for %04x %04x\n",VENDOR_ID,PRODUCT_ID);
@@ -104,103 +131,124 @@ struct libusb_device_handle *gboot_open(void)
  out:
   libusb_close(devh);
   return NULL;
+
+  return NULL;
+  */
 }
 
 
-int gboot_close(struct libusb_device_handle *devh)
+int gboot_close(hid_device *devh)
 {
   if(devh) {
+    hid_close(devh);
+
+    /*
     libusb_release_interface(devh, 0);
     libusb_close(devh);
+    */
+
     return 0;
   }
+
   return -1;
 }
 
-int gboot_cmd_write(libusb_device_handle *devh,
+int gboot_cmd_write(hid_device *devh,
 			   unsigned int addr, unsigned char d)
 {
-  unsigned char buf[CMD_PACKET_SIZE];
+  unsigned char buf[CMD_PACKET_SIZE + 1];
 
-  buf[0]=CMD_WRITE;
-  buf[1]=addr&0xff;
-  buf[2]=addr>>8;
-  buf[3]=d;
+  buf[0] = 0x00;
+  buf[1]=CMD_WRITE;
+  buf[2]=addr&0xff;
+  buf[3]=addr>>8;
+  buf[4]=d;
   return gboot_send(devh,buf);
+
+  return 0;
 }
 
-int gboot_cmd_erase(libusb_device_handle *devh,
+int gboot_cmd_erase(hid_device *devh,
 			   unsigned int addr)
 {
-  unsigned char buf[CMD_PACKET_SIZE];
+  unsigned char buf[CMD_PACKET_SIZE + 1];
 
-  buf[0]=CMD_ERASE;
-  buf[1]=addr&0xff;
-  buf[2]=addr>>8;
-  buf[3]=0;
+  buf[0] = 0x00;
+  buf[1]=CMD_ERASE;
+  buf[2]=addr&0xff;
+  buf[3]=addr>>8;
+  buf[4]=0;
   return gboot_send(devh,buf);
+
+  return 0;
 }
 
-int gboot_cmd_reboot(libusb_device_handle *devh)
+int gboot_cmd_reboot(hid_device *devh)
 {
-  unsigned char buf[CMD_PACKET_SIZE];
+  unsigned char buf[CMD_PACKET_SIZE + 1];
 
-  buf[0]=CMD_REBOOT;
-  buf[1]=0;
+  buf[0] = 0x00;
+  buf[1]=CMD_REBOOT;
   buf[2]=0;
   buf[3]=0;
+  buf[4]=0;
   return gboot_send(devh,buf);
+
+  return 0;
 }
 
 
-int gboot_cmd_read(libusb_device_handle *devh,
-		   unsigned int addr,   unsigned char buf[CMD_PACKET_SIZE])
+int gboot_cmd_read(hid_device *devh,
+		   unsigned int addr,   unsigned char buf[CMD_PACKET_SIZE + 1])
 {
   int r;
 
-  buf[0]=CMD_READ;
-  buf[1]=addr&0xff;
-  buf[2]=addr>>8;
-  buf[3]=0;
+  buf[0] = 0x00;
+  buf[1]=CMD_READ;
+  buf[2]=addr&0xff;
+  buf[3]=addr>>8;
+  buf[4]=0;
   r = gboot_send(devh,buf);
   if(r==0 ) r = gboot_recv(devh,buf);
   return r;
+
+  return 0;
 }
 
-int gboot_get_info(libusb_device_handle *devh, struct gboot_info *info)
+int gboot_get_info(hid_device *devh, struct gboot_info *info)
 {
   int r;
-  unsigned char buf[CMD_PACKET_SIZE];
+  unsigned char buf[CMD_PACKET_SIZE + 1];
 
   r=gboot_cmd_read(devh, GBOOT_INFO_OFFSET, buf);
   if(r) return r;
 
   //  printf("GBOOT version: %x.%x\n",buf[1]&0x0f,buf[0]);
-  info->gboot_version=((buf[1]&0x0f)<<8)|buf[0];
-  info->api_ver=buf[1]>>4;
-  info->mcu=(buf[3]<<8)|buf[2];
+  info->gboot_version=((buf[2]&0x0f)<<8)|buf[1];
+  info->api_ver=buf[2]>>4;
+  info->mcu=(buf[4]<<8)|buf[3];
 
   r=gboot_cmd_read(devh, FLASH_INFO_OFFSET, buf);
   if(r) return r;
   //  print_data(0, buf, CMD_PACKET_SIZE);
-  info->flash_start=buf[0]<<8;
-  info->flash_end=(buf[1]<<8)+0xff;
-  info->flash_erase_size=1<<(buf[2]&0xf);
-  info->user_flash_size=(buf[1]-buf[0]+1)*256;
+  info->flash_start=buf[1]<<8;
+  info->flash_end=(buf[2]<<8)+0xff;
+  info->flash_erase_size=1<<(buf[3]&0xf);
+  info->user_flash_size=(buf[2]-buf[1]+1)*256;
 
   r=gboot_cmd_read(devh, DEV_INFO_OFFSET, buf);
   if(r) return r;
-  info->usb_pid=(buf[1]<<8)|buf[0];
-  info->hw_ver=buf[2];
+  info->usb_pid=(buf[2]<<8)|buf[1];
+  info->hw_ver=buf[3];
 
   if(info->gboot_version>=0x020) {
-    info->pcb_rev=buf[3];
+    info->pcb_rev=buf[4];
     gboot_cmd_read(devh, DEV_SERIAL_OFFSET, buf);
-    info->serial=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
+    info->serial=(buf[4]<<24)|(buf[3]<<16)|(buf[2]<<8)|buf[1];
     //gboot_cmd_read(devh, DEV_FEATURE_OFFSET, buf);
     //info->dev_config=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
     gboot_cmd_read(devh, EXT_INFO_OFFSET, buf);
-    info->ext_info=(buf[3]<<24)|(buf[2]<<16)|(buf[1]<<8)|buf[0];
+    info->ext_info=(buf[4]<<24)|(buf[3]<<16)|(buf[2]<<8)|buf[1];
   } else {
     info->pcb_rev=0;
     info->serial=0;
@@ -212,6 +260,7 @@ int gboot_get_info(libusb_device_handle *devh, struct gboot_info *info)
   //  printf("\nMax code size: %5.1fk (0x%02x bytes)\n", user_flash_size/1024., user_flash_size);
 }
 
+// shraken TODO: remove dead function, not used
 /*int gboot_cmd_info(libusb_device_handle *devh, int info_idx,
 		   unsigned char buf[CMD_PACKET_SIZE])
 {
@@ -221,8 +270,11 @@ int gboot_get_info(libusb_device_handle *devh, struct gboot_info *info)
 
 
 
-int gboot_send(libusb_device_handle *devh, unsigned char packet[CMD_PACKET_SIZE])
+int gboot_send(hid_device *devh, unsigned char packet[CMD_PACKET_SIZE + 1])
 {
+
+
+  /*
   int r;
   
   r = libusb_control_transfer(devh, CTRL_OUT, HID_SET_REPORT,
@@ -233,13 +285,23 @@ int gboot_send(libusb_device_handle *devh, unsigned char packet[CMD_PACKET_SIZE]
     fprintf(stderr, "Control Out error %d\n", r);
     return r;
   }
-  
+  */
+
+  int res;
+
+  res = hid_send_feature_report(devh, packet, (CMD_PACKET_SIZE + 1));
+  if (res < 0) {
+    fprintf(stderr, "Control Out error %d\n", res);
+    return res;
+  }
+
   return 0;
 }
 
 
-int gboot_recv(libusb_device_handle *devh, unsigned char packet[CMD_PACKET_SIZE])
+int gboot_recv(hid_device *devh, unsigned char packet[CMD_PACKET_SIZE + 1])
 {
+  /*
   int r;
   
   r = libusb_control_transfer(devh, CTRL_IN, HID_GET_REPORT,
@@ -250,7 +312,17 @@ int gboot_recv(libusb_device_handle *devh, unsigned char packet[CMD_PACKET_SIZE]
     fprintf(stderr, "Control IN error %d\n", r);
     return r;
   }
-  
+  */
+
+  int res;
+
+  res = hid_get_feature_report(devh, packet, (CMD_PACKET_SIZE + 1));
+
+  if (res < 0) {
+    fprintf(stderr, "Control Out error %d\n", res);
+    return res;
+  }
+
   return 0;
 }
 
