@@ -52,12 +52,22 @@ static void print_data(int addr, unsigned char *p, int len)
 
 static int print_data_hex(unsigned int addr)
 {
-  unsigned char buf[CMD_PACKET_SIZE*2];
+  unsigned char buf[(CMD_PACKET_SIZE + 1)*2];
+  unsigned char first_buf[CMD_PACKET_SIZE + 1];
+  unsigned char second_buf[CMD_PACKET_SIZE + 1];
 
+  /*
   gboot_cmd_read(devh, addr, buf);
-  gboot_cmd_read(devh, addr+4, buf+4);
-  
-  print_data(addr, buf, CMD_PACKET_SIZE*2);
+  gboot_cmd_read(devh, addr+4, buf+5);
+  */
+
+  gboot_cmd_read(devh, addr, first_buf);
+  gboot_cmd_read(devh, addr + 4, second_buf);
+
+  memcpy(buf, first_buf + 1, 4);
+  memcpy(buf + 4, second_buf + 1, 4);
+
+  print_data(addr, buf, CMD_PACKET_SIZE *2);
    return 0;
 }
 
@@ -122,7 +132,7 @@ static int program (char *fname)
   printf("firmware %s size: %d\n",fname,s);
 
   // int page_size,fstart,fend,fsize;
-  unsigned char buf[CMD_PACKET_SIZE];
+  unsigned char buf[CMD_PACKET_SIZE + 1];
   struct gboot_info ginfo;
 
   gboot_get_info(devh,&ginfo);
@@ -167,10 +177,10 @@ static int program (char *fname)
       int j;
       gboot_cmd_read(devh, ginfo.flash_start + i, buf);
       
-      for(j=0; (j<4) && (i+j<s) ;j++) {
-	if(buf[j]!=fw[i+j]) {
+      for(j=1; (j<5) && (i+j<s) ;j++) {
+	if(buf[j]!=fw[i+j - 1]) {
 	  printf("error at offset %04x\n",ginfo.flash_start+i);
-	  printf("expected: %02x  read: %02x",fw[i+j],buf[j]);
+	  printf("expected: %02x  read: %02x",fw[i+j - 1],buf[j]);
 	  return 3;
 	}
       }
