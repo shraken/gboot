@@ -26,8 +26,8 @@ sudo cp -r sdcc-3.6.0/* /usr/local
 rm -rf sdcc-3.6.0
 rm -rf sdcc-3.6.0-i386-unknown-linux2.5.tar.bz2
 
-if [ -f /vagrant/JLink_Linux_V620i_x86_64.deb ]; then
-    sudo dpkg -i /vagrant/JLink_Linux_V620i_x86_64.deb > /dev/null 2>&1
+if [ -f /vagrant/JLink_Linux_*.deb ]; then
+    sudo dpkg -i /vagrant/JLink_Linux_*.deb > /dev/null 2>&1
 fi
 
 echo "All Finished!"

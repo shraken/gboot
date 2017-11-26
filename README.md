@@ -25,10 +25,10 @@ gboot USB devices.
 
 ### Requirements
 
-[VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-[VirtualBox Extension Pack](http://download.virtualbox.org/virtualbox/5.2.2/Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack)
-[Vagrant](https://www.vagrantup.com/downloads.html)
-[SEGGER JLink](https://www.segger.com/downloads/jlink)
+1. [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+2. [VirtualBox Extension Pack](http://download.virtualbox.org/virtualbox/5.2.2/Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack)
+3. [Vagrant](https://www.vagrantup.com/downloads.html)
+4. [SEGGER JLink Linux x64](https://www.segger.com/downloads/jlink)
 
 The VirtualBox Extension Pack is required for USB 2.0/3.0 devices.  Close the VirtualBox application before executing the below commands.  On Windows systems, just open the *.vbox-extpack file.
 
@@ -38,7 +38,7 @@ open -W Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack
 rm Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack
 ```
 
-*NOTE: You must fill out the info form and download the latest JLink software package from SEGGER from the above link to flash the gboot bootloader project the first time.  Alternatively, you can copy the hex file and program using traditional SiLabs 8-bit USB debug adapters.
+*NOTE: You must fill out the info form and download the latest JLink Linux x64 software package from SEGGER with the above link to flash the gboot bootloader project for the first time.  Alternatively, you can copy the hex file to a native OS and program using traditional SiLabs 8-bit USB debug adapters.
 
 ### Build and Flashing It
 
