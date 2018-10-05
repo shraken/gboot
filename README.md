@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/shraken/usbhid_buddy.svg?branch=master)](https://travis-ci.org/shraken/usbhid_buddy)
+[![Build Status](https://travis-ci.org/shraken/gboot.svg?branch=master)](https://travis-ci.org/shraken/gboot)
 
 # gboot USB HID bootloader
 
