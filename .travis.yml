@@ -13,7 +13,7 @@ jobs:
         - sudo apt-get install -y srecord
         - sudo pip install intelhex
       script:
-        - cd bootloader/gboot
+        - cd gboot
         - make FLASH_SIZE=64 VARIANT=F38x
 
     - stage: "gflash bootloader host utility compile"
@@ -22,7 +22,7 @@ jobs:
         - sudo apt-get install -y libusb-1.0-0-dev
 
       before_script:
-        - cd bootloader/gflash
+        - cd gflash
         - mkdir -p build
         - cd build
         - cmake ..
