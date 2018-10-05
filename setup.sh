@@ -20,7 +20,7 @@ sudo apt-get install -y srecord > /dev/null 2>&1
 sudo apt-get install -y cmake > /dev/null 2>&1
 sudo apt-get install -y libusb-1.0-0-dev > /dev/null 2>&1
 
-wget https://versaweb.dl.sourceforge.net/project/sdcc/sdcc-linux-x86/3.6.0/sdcc-3.6.0-i386-unknown-linux2.5.tar.bz2 > /dev/null 2>&1
+wget http://download2.nust.na/pub4/sourceforge/s/project/sd/sdcc/sdcc-linux-x86/3.6.0/sdcc-3.6.0-i386-unknown-linux2.5.tar.bz2 > /dev/null 2>&1
 tar xjf sdcc-3.6.0-i386-unknown-linux2.5.tar.bz2 > /dev/null 2>&1
 sudo cp -r sdcc-3.6.0/* /usr/local
 rm -rf sdcc-3.6.0
