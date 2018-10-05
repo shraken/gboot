@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/shraken/usbhid_buddy.svg?branch=master)](https://travis-ci.org/shraken/usbhid_buddy)
+
 # gboot USB HID bootloader
 
 gboot is an 8051 USB HID bootloader designed for the Silicon Labs C8051F3xx family

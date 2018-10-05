@@ -1,0 +1,31 @@
+language: c
+sudo: true
+
+compiler:
+  - gcc
+
+jobs:
+  include:
+    - stage: "gboot bootloader firmware compile"
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y sdcc
+        - sudo apt-get install -y srecord
+        - sudo pip install intelhex
+      script:
+        - cd gboot
+        - make FLASH_SIZE=64 VARIANT=F38x
+
+    - stage: "gflash bootloader host utility compile"
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y libusb-1.0-0-dev
+
+      before_script:
+        - cd gflash
+        - mkdir -p build
+        - cd build
+        - cmake ..
+      
+      script:
+        - make
